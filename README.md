@@ -39,6 +39,7 @@ Colors
 * 🟥 red – Syscalls that failed / errored.
 * 🟦 cyan – Logging messages from `strace`.
 
+Remaining stdout / stderr are left as-is.
 Feedback most welcome!
 
 Example
