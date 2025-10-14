@@ -1,0 +1,25 @@
+name: CI
+on:
+  push:
+    branches: [master]
+    tags: ['v*']
+  pull_request: { branches: [master] }
+  schedule: [ cron: '1 2 3 * *' ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: shellcheck -S warning colorstrace test.sh
+      - run: time ./test.sh
+
+  workflow-keepalive:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - uses: liskin/gh-workflow-keepalive@f72ff1a1336129f29bf0166c0fd0ca6cf1bcb38c  # v1.2.1
