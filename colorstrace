@@ -1,0 +1,54 @@
+#!/bin/sh
+# colorstrace - add color to `strace` output
+set -eu
+# Read $COLORSTRACE, the list of syscalls to highlight
+file_syscalls='access acct chdir chmod chown chroot close creat dup fallocate fcntl fstat
+ioctl lseek mkdir mknod open rename rmdir stat symlink umask unlink utime'
+process_syscalls='clone execve exit fork kill setsid wait4'
+highlight_syscalls="${COLORSTRACE-$file_syscalls,$process_syscalls}"
+highlight_syscalls="$(echo "${highlight_syscalls:-no_match;}" | tr ',[[:space:]]' '|')"
+highlight_syscalls="${highlight_syscalls##|}"
+highlight_syscalls="${highlight_syscalls%%|}"
+if [ $# -eq 0 ]
+then cat
+else stdbuf -oL -eL strace "$@"
+fi 2>&1 | awk -v highlight_syscalls="$highlight_syscalls" -- '
+BEGIN {
+    r="\033[31m"; g="\033[37m"; w="\033[97m"; b="\033[36m"; n="\033[0m"; }
+
+# Syscalls that failed in RED
+/^(\[pid +[0-9]+\] )?[a-z_]+[0-9]*\(.*?\) += -[0-9]+ E[A-Z]+ \([A-Za-z ]+\)$/ { print r $0 n; next }
+
+# Highlighted syscalls in WHITE
+$0 ~ "^(\\[pid +[0-9]+\\] )?[a-z0-9_]*" highlight_syscalls "[a-z0-9_]*\\(" { print w $0 n; next }
+
+# Non-highlighted syscalls in GRAY
+/^(\[pid +[0-9]+\] )?[a-z_]+[0-9]*\(.*?(\) += ([0-9]+|\?|0x[0-9a-f]+)|<unfinished \.\.\.>)$/ { print g $0 n; next }
+
+# Syscalls like "<... openat resumed>" in GRAY
+/^(\[pid +[0-9]+\] )?<\.\.\. [a-z_]+.*? += [0-9]+$/ { print g $0 n; next }
+
+# Syscall "write" that maybe interleaves with program stderr output
+/^(\[pid +[0-9]+\] )?write\(.*?"[^"]*"\.*, [0-9]+.*$/ {
+    print g gensub(/(.*?write\(.*?"[^"]*"\.*, [0-9]+)(.*?)(\) += [0-9]+)?/,
+                   "\\1" n "\\2" g "\\3", 1) n;
+    if ($0 !~ /\) += [0-9]+$/) in_write=1;
+    next }
+/^\) += [0-9]+$/ { if (in_write) print g $0 n; in_write=""; next }
+
+# Syscalls "clone" interleave strace stderr output
+/^(\[pid +[0-9]+\] )?clone.?\(/ {
+    print g gensub(/(.*?clone.?\([^}]+\})(.*?)( => {parent_.*? = [0-9]+)?$/,
+                   "\\1" b "\\2" g "\\3", 1) n;
+    if ($0 !~ / => {parent_.*? = [0-9]+$/) in_clone=1;
+    next }
+/^ => {parent_.*? = [0-9]+$/ { if (in_clone) print g $0 n; in_clone=""; next }
+
+# Subprocess "exited with 0" notices in GRAY
+/^(\[pid +[0-9]+\] )?\+\+\+ exited with [0-9]+ \+\+\+$/ { print g $0 n; next }
+
+# New processes in CYAN
+/^strace: Process [0-9]+ (att|det)ached$/ { print b $0 n; next }
+
+# Non-strace stdout/stderr text
+{print}'
