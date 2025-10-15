@@ -2,8 +2,8 @@
 # colorstrace - add color to `strace` output
 set -eu
 # Read $COLORSTRACE, the list of syscalls to highlight
-file_syscalls='access acct chdir chmod chown chroot close creat dup fallocate fcntl fstat
-ioctl lseek mkdir mknod open rename rmdir stat symlink umask unlink utime'
+file_syscalls='access acct chdir chmod chown chroot close creat dup fallocate
+mkdir mknod open rename rmdir stat symlink umask unlink utime'
 process_syscalls='clone execve exit fork kill setsid wait4'
 highlight_syscalls="${COLORSTRACE-$file_syscalls,$process_syscalls}"
 highlight_syscalls="$(echo "${highlight_syscalls:-no_match;}" | tr ',[[:space:]]' '|')"
