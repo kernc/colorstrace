@@ -20,10 +20,10 @@ BEGIN {
 /^(\[pid +[0-9]+\] )?[a-z_]+[0-9]*\(.*?\) += -[0-9]+ E[A-Z]+ \([A-Za-z ]+\)$/ { print r $0 n; next }
 
 # Highlighted syscalls in WHITE
-$0 ~ "^(\\[pid +[0-9]+\\] )?[a-z0-9_]*" highlight_syscalls "[a-z0-9_]*\\(" { print w $0 n; next }
+$0 ~ ("^(\\[pid +[0-9]+\\] )?[a-z0-9_]*(" highlight_syscalls ")[a-z0-9_]*\\(") { print w $0 n; next }
 
 # Non-highlighted syscalls in GRAY
-/^(\[pid +[0-9]+\] )?[a-z_]+[0-9]*\(.*?(\) += ([0-9]+|\?|0x[0-9a-f]+)|<unfinished \.\.\.>)$/ { print g $0 n; next }
+/^(\[pid +[0-9]+\] )?[a-z_]+[0-9]*\(.*?(\) += ([0-9]+|\?|0x[0-9a-f]+)( \(.*?)?|<unfinished \.\.\.>)$/ { print g $0 n; next }
 
 # Syscalls like "<... openat resumed>" in GRAY
 /^(\[pid +[0-9]+\] )?<\.\.\. [a-z_]+.*? += [0-9]+$/ { print g $0 n; next }
