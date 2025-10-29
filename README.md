@@ -42,6 +42,13 @@ Colors
 Remaining stdout / stderr are left as-is.
 Feedback most welcome!
 
+
+Environment variables
+---------------------
+* `VERBOSE`, if set, echoes all lines, instead of (by default)
+  passing them through `uniq`, which filters sequences of duplicates.
+
+
 Example
 -------
 ![screenshot](screen.png)
