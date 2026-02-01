@@ -1,5 +1,5 @@
-`colorstrace` - add color to `strace` output
-============================================
+`colorstrace` - add $\color{red}\textbf{color}$ to `strace` output
+==================================================================
 
 [![Build status](https://img.shields.io/github/actions/workflow/status/kernc/colorstrace/ci.yml?branch=master&style=for-the-badge)](https://github.com/kernc/colorstrace/actions)
 [![Language: shell / Bash / AWK](https://img.shields.io/badge/lang-Shell-peachpuff?style=for-the-badge)](https://github.com/kernc/colorstrace)
@@ -22,11 +22,11 @@ sudo chmod +x /usr/local/bin/colorstrace
 Usage
 -----
 ```sh
+# Trace program, colorizing output
+colorstrace [STRACE_ARGS] PROG [ARGS...]
+
 # Colorize existing trace
 colorstrace < strace.log
-
-# Trace program, colorizing output
-colorstrace STRACE_ARGS PROG ARGS
 ```
 
 Colors
