@@ -12,7 +12,9 @@ highlight_syscalls="${highlight_syscalls%%|}"
 maybe_verbose () { [ "${VERBOSE:-}" ] && cat || uniq; }  # Default is uniq, which skips long seqs of dups
 if [ $# -eq 0 ]
 then cat
-else stdbuf -oL -eL strace "$@"
+else
+    strace_default_args="$(case " $* " in *' -e'*) ;; *) echo "-f -e %file,%process --seccomp-bpf" ;; esac)"
+    stdbuf -oL -eL strace $strace_default_args "$@"
 fi 2>&1 | maybe_verbose | awk -v highlight_syscalls="$highlight_syscalls" -- '
 BEGIN {
     r="\033[31m"; g="\033[37m"; w="\033[97m"; b="\033[36m"; n="\033[0m"; }

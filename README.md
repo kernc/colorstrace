@@ -28,6 +28,9 @@ colorstrace [STRACE_ARGS] PROG [ARGS...]
 # Colorize existing trace
 colorstrace < strace.log
 ```
+If not provided by the user, default strace args are set to
+`-f -e %file,%process` for convenience.
+To observe _all_ syscalls, pass `-e all`.
 
 Colors
 ------
