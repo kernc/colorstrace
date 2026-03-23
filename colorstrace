@@ -13,8 +13,14 @@ maybe_verbose () { [ "${VERBOSE:-}" ] && cat || uniq; }  # Default is uniq, whic
 if [ $# -eq 0 ]
 then cat
 else
-    strace_default_args="$(case " $* " in *' -e'*) ;; *) echo "-f -e %file,%process --seccomp-bpf" ;; esac)"
-    stdbuf -oL -eL strace $strace_default_args "$@"
+    # Set default strace arguments. Later args override the former
+    set -- -e %file,%process,read,write "$@"
+    case "${1-}" in -*) ;; *)
+        set -- -f --seccomp-bpf --string-limit=256 \
+            --decode-fds=all --decode-pids=comm --decode-pids=pidns \
+            "$@" ;;
+    esac
+    stdbuf -oL -eL strace "$@"
 fi 2>&1 | maybe_verbose | awk -v highlight_syscalls="$highlight_syscalls" -- '
 BEGIN {
     r="\033[31m"; g="\033[37m"; w="\033[97m"; b="\033[36m"; n="\033[0m"; }
