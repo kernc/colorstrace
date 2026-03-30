@@ -13,4 +13,4 @@ echo "$output" | { set -x; grep -qo '0mroot'   ; } # neutral
 
 # Test default strace args
 output_short="$(test_cmd)"
-echo "$(echo "$output" | wc -l)" -gt "$(echo "$output_short" | wc -l)"
+test "$(echo "$output" | wc -l)" -gt "$(echo "$output_short" | wc -l)"
